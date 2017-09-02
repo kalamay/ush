@@ -1,0 +1,104 @@
+.TH USH 3 2017-07-01 ush "Ush User's Manual"
+.SH "NAME"
+\fBush\fR - Micro shell command pipeline runner
+
+
+.SH "SYNOPSIS"
+.P
+\fBush\fR [\fI-i\fR IN] [\fI-o\fR OUT] [\fI-e\fR ERR] CMD1 [ARGS1...] [\fI\\|\fR CMD2 [ARGS2...]...]
+
+
+.SH "DESCRIPTION"
+.P
+\fBush\fR executes a sequence of commands similarly to the shell. Each process
+is forked and executed and connected using pipes. Unlike a shell, it does
+nothing else. This makes \fBush\fR appropriate for uses where running a shell
+is challenging or when security is critical.
+.P
+The following options are available: 
+.P
+.TP
+\fI-h\fR
+Show usage information and exit.
+.TP
+\fI-a\fR
+Put next output redirection file in append mode instead of truncating it.
+.TP
+\fI-i\fR
+Change standard input: \fI-i /some/path\fR to read from a file path, and
+\fI-i @5\fR to read from a file descriptor open for reading.
+See REDIRECTION for more information.
+.TP
+\fI-o\fR
+Change standard output: \fI-o /some/path\fR to write to a truncated file, and
+\fI-o @5\fR to write to a file descriptor open for writing. Including the
+\fI-a\fR flag (\fI-ao ...\fR) will append to the file rather than truncate it.
+In either case, the file will be created if it is missing.
+See REDIRECTION for more information.
+.TP
+\fI-e\fR
+Change standard error: \fI-e /some/path\fR to write to a truncated file, and
+\fI-e @5\fR to write to a file descriptor open for writing. Including the
+\fI-a\fR flag (\fI-ae ...\fR) will append to the file rather than truncate it.
+In either case, the file will be created if it is missing.
+See REDIRECTION for more information.
+.TP
+\fI-d\fR
+Duplicate one file descriptor into another. For example, this duplicates 1 into
+10: \fI-d 1,10\fR.
+.TP
+\fI-c\fR
+Closes a file descriptor.
+.TP
+\fI-d\fR
+Moves one file descriptor to another. This is similar to combining \fI-d\fR and
+\fI-c\fR.
+.TP
+\fI\\|\fR
+Connect another command to the pipeline.
+.RE
+
+.SH "REDIRECTION"
+.P
+Before any command is executed, standard I/O may be redirected to files,
+arbitrary file descriptors, and network sockets. \fBush\fR supports redirection
+in a similar capacity to other shells, but it uses command line switches rather
+than a special syntax: \fI-i\fR for standard input, \fI-o\fR for standard
+output, and \fI-e\fR for standard error. When preceeded by the \fI-a\fR option,
+the next writable file descriptor redirection will be appended to when
+appropriate.
+.P
+\fBush\fR handles several filenames specially when they are used in
+redirections. When not provided by the underlying operating system, these
+special devices are supported:
+.P
+.TP
+/dev/fd/\fIfd\fR
+If \fIfd\fR is a valid integer, file descriptor \fIfd\fR is duplicated.
+.TP
+/dev/stdin
+File descriptor 0 is duplicated.
+.TP
+/dev/stdout
+File descriptor 1 is duplicated.
+.TP
+/dev/stderr
+File descriptor 2 is duplicated.
+.TP
+/dev/tcp/\fIhost\fR/\fIport\fR
+If \fIhost\fR is a valid hostname or Internet address, and \fIport\fR is an
+integer port number or service name, \fBush\fR attempts to open the
+corresponding TCP socket.
+.TP
+/dev/udp/\fIhost\fR/\fIport\fR
+If \fIhost\fR is a valid hostname or Internet address, and \fIport\fR is an
+integer port number or service name, \fBush\fR attempts to open the
+corresponding UDP socket.
+.P
+A failure to open or create a file causes the redirection to fail, and none of
+the commands are executed.
+
+.SH "EXAMPLE"
+.nf
+ush -o /dev/tcp/localhost/8080 du -cks ./* \\| sort -nr \\| head -n 10
+.fi
