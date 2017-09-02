@@ -1,7 +1,5 @@
 # ush
 
-Micro shell command pipeline runner
-
 ush executes a sequence of commands similarly to the shell. Each process
 is forked and executed and connected using pipes. Unlike a shell, it does
 nothing else. This makes ush appropriate for uses where running a shell
@@ -12,7 +10,7 @@ is challenging or when security is critical.
 Forward log messages that match an expression in grep.
 
 ```bash
-ush -o /dev/tcp/localhost/9999 nc -kl localhost | grep ERROR
+ush -o /dev/tcp/localhost/9999 nc -kl localhost \| grep ERROR
 ```
 
 Getting the top 5 memory consumer across a few hosts. Proper monitoring tools
